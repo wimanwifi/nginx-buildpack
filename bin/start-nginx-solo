@@ -10,6 +10,9 @@ erb config/nginx.conf.erb > config/nginx.conf
 #Evaluate to write port file
 erb config/port_config.erb > config/port_config
 
+#Evaluate to write the domain name file
+erb config/domain_name.erb > config/domain_name
+
 n=1
 while getopts :f option ${@:1:2}
 do
