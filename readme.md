@@ -1,5 +1,93 @@
 # Heroku Buildpack: NGINX
 
+This is Belly's fork of  [ryandotsmith/nginx-buildpack](https://github.com/ryandotsmith/nginx-buildpack). Here's what is different:
+
+* Moved the port variable configuration to a file that can be included in any nginx config file. This is helpful for breaking a large config file into multiple files and still being able to achieve a variable port number (necessary for Heroku). [9c1528a](https://github.com/bellycard/nginx-buildpack/commit/9c1528ae218b57fe40724ca87a61eb08e4046504)
+* Upgraded nginx to version 1.9.4 & added openssl support. Belly's requirements dictate that our proxy support SSL, so we added it, also upgraded to the latest nginx, since we were recompiling it anyway. [8233318](https://github.com/bellycard/nginx-buildpack/commit/82333189afdf0bffd9fc8f6d5885f363968e6059), [0176e38](https://github.com/bellycard/nginx-buildpack/commit/0176e389cc97f4059d68102b6eb9c5bc0755953f), [bfacddd](https://github.com/bellycard/nginx-buildpack/commit/bfacddd641e5f77c7eb005be4a030dbe0c310911)
+* Added `start-nginx-solo`. The original buildpack expected that you were proxying a request to some app running within the same dyno. This isn't necessary for Belly's use case, so the solo option was added to remove some of the moving parts. [f14698e](https://github.com/bellycard/nginx-buildpack/commit/f14698eb7435cd1ee009486ae0c28a1ca4dc5923), [b19c940](https://github.com/bellycard/nginx-buildpack/commit/b19c940202b61300dfec508a1f1664c6caccc13a)
+
+## Recompile nginx
+
+In order to recompile nginx, you need to build it on the target system that it will be running on. In this case we want to build it for `cedar` and `cedar-14`. Here's how to do it:
+
+1. Make a local directory for the app that will be used to do the compiling and `git init` it:
+
+  ```
+  mkdir nginx-builder
+  cd nginx-builder
+  git init .
+  ```
+
+2. Next, create an app on Heroku for your target stack using the multi buildpack.
+
+  ```
+  heroku create --buildpack https://github.com/ddollar/heroku-buildpack-multi.git --stack cedar-14 (or cedar)
+  ```
+
+  ```
+  Creating infinite-wave-4795... done, stack is cedar-14
+  Buildpack set. Next release on infinite-wave-4795 will use https://github.com/ddollar/heroku-buildpack-multi.git.
+  https://infinite-wave-4795.herokuapp.com/ | https://git.heroku.com/infinite-wave-4795.git
+  Git remote heroku added
+  ```
+
+3. Add the `ruby` and `nginx` buildpacks to the `.buildpacks` file.
+
+  ```
+  echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
+  echo 'https://github.com/bellycard/nginx-buildpack.git' >> .buildpacks
+  ```
+
+4. Add a Gemfile. (doesn't really matter what is in there, it just needs a Gemfile to boot)
+
+  ```
+  echo "source 'https://rubygems.org'" >> Gemfile
+  echo "gem 'unicorn'" >> Gemfile
+  bundle install
+  ```
+
+
+5. Create a `Procfile` in your local directory to tell the app what to do when it starts up. `build_nginx.sh` is the compiler script. So when the dyno boots it will just start to compile right away.
+
+  ```
+  echo 'web: scripts/build_nginx.sh' >> Procfile
+  ```
+
+6. Commit those files locally:
+
+  ```
+  git add Procfile Gemfile Gemfile.lock .buildpacks
+  git commit -m "Added Procfile, Gemfile & buildpacks"
+  ```
+
+7. Start tailing the logs in a separate terminal and deploy the app:
+
+  ```
+  heroku logs --tail
+  ```
+
+  ```
+  git push heroku master
+  ```
+
+8. If all goes well, the compiler will kick off and you will see output in the logs. This will take some time, so go grab some coffee.
+
+9. Once the compiler is done the logs will just output a `.`. From there you can go to your browser and get the built binary.
+
+  ```
+  heorku open
+  ```
+
+  The compiled binary will be in `/nginx/sbin/nginx`.
+
+10. Once you have the file, you can delete the temporary app created on Heroku.c
+
+
+### -- original readme below --
+
+
+# Heroku Buildpack: NGINX
+
 Nginx-buildpack vendors NGINX inside a dyno and connects NGINX to an app server via UNIX domain sockets.
 
 ## Motivation
@@ -102,7 +190,7 @@ Update Unicorn Config
 require 'fileutils'
 listen '/tmp/nginx.socket'
 before_fork do |server,worker|
-	FileUtils.touch('/tmp/app-initialized')
+  FileUtils.touch('/tmp/app-initialized')
 end
 ```
 ```bash
@@ -141,7 +229,7 @@ worker_processes 4
 listen '/tmp/nginx.socket', backlog: 1024
 
 before_fork do |server,worker|
-	FileUtils.touch('/tmp/app-initialized')
+  FileUtils.touch('/tmp/app-initialized')
 end
 ```
 Install Gems
