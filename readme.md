@@ -81,7 +81,7 @@ In order to recompile nginx, you need to build it on the target system that it w
 
   The compiled binary will be in `/nginx/sbin/nginx`.
 
-10. Once you have the file, you can delete the temporary app created on Heroku.c
+10. Once you have the file, you can delete the temporary app created on Heroku.
 
 
 ### -- original readme below --
