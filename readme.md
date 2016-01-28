@@ -9,7 +9,7 @@ This is Belly's fork of  [ryandotsmith/nginx-buildpack](https://github.com/ryand
 
 ## Recompile nginx
 
-In order to recompile nginx, you need to build it on the target system that it will be running on. In this case we want to build it for `cedar` and `cedar-14`. Here's how to do it:
+In order to recompile nginx, you need to build it on the target system that it will be running on. In this case we want to build it for `cedar-14`. Here's how to do it:
 
 1. Make a local directory for the app that will be used to do the compiling and `git init` it:
 
@@ -22,7 +22,7 @@ In order to recompile nginx, you need to build it on the target system that it w
 2. Next, create an app on Heroku for your target stack using the multi buildpack.
 
   ```
-  heroku create --buildpack https://github.com/ddollar/heroku-buildpack-multi.git --stack cedar-14 (or cedar)
+  heroku create --org belly --buildpack https://github.com/ddollar/heroku-buildpack-multi.git --stack cedar-14
   ```
 
   ```
@@ -61,7 +61,7 @@ In order to recompile nginx, you need to build it on the target system that it w
   git commit -m "Added Procfile, Gemfile & buildpacks"
   ```
 
-7. Start tailing the logs in a separate terminal and deploy the app:
+7. Start tailing the logs in a separate terminal and deploy the app, then immediately scale to a performance L dyno:
 
   ```
   heroku logs --tail
@@ -69,6 +69,7 @@ In order to recompile nginx, you need to build it on the target system that it w
 
   ```
   git push heroku master
+  heroku ps:scale web=1:performance-l
   ```
 
 8. If all goes well, the compiler will kick off and you will see output in the logs. This will take some time, so go grab some coffee.
@@ -76,12 +77,12 @@ In order to recompile nginx, you need to build it on the target system that it w
 9. Once the compiler is done the logs will just output a `.`. From there you can go to your browser and get the built binary.
 
   ```
-  heorku open
+  heroku open
   ```
 
   The compiled binary will be in `/nginx/sbin/nginx`.
 
-10. Once you have the file, you can delete the temporary app created on Heroku.
+10. Once you have the file, copy it to the `bin` directory in the `nginx-buildpack` repo under the appropriate stack name `nginx-cedar-14`. You can delete the temporary app created on Heroku.
 
 
 ### -- original readme below --
