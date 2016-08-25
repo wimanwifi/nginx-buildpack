@@ -9,7 +9,9 @@
 # Once the dyno has is 'up' you can open your browser and navigate
 # this dyno's directory structure to download the nginx binary.
 
-NGINX_VERSION=${NGINX_VERSION-1.9.10}
+set -o errexit
+
+NGINX_VERSION=${NGINX_VERSION-1.9.15}
 PCRE_VERSION=${PCRE_VERSION-8.38}
 HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.23}
 OPEN_SSL_VERSION=${OPEN_SSL_VERSION-1.0.1p}
@@ -20,6 +22,8 @@ headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-modu
 open_ssl_url=https://www.openssl.org/source/openssl-${OPEN_SSL_VERSION}.tar.gz
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
+
+num_cpu_cores=$(grep -c ^processor /proc/cpuinfo)
 
 echo "Serving files from /tmp on $PORT"
 cd /tmp
@@ -46,8 +50,9 @@ echo "Downloading $open_ssl_url"
 		--with-pcre=pcre-${PCRE_VERSION} \
 		--prefix=/tmp/nginx \
 		--add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
-    --with-http_ssl_module --with-openssl=${temp_dir}/nginx-${NGINX_VERSION}/openssl-${OPEN_SSL_VERSION}
-	make install
+		--with-http_ssl_module --with-openssl=${temp_dir}/nginx-${NGINX_VERSION}/openssl-${OPEN_SSL_VERSION} \
+		--with-http_sub_module
+	make -j ${num_cpu_cores} install
 )
 
 while true
