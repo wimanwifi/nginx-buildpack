@@ -1,0 +1,7 @@
+FROM  heroku/cedar:14
+
+RUN mkdir /build
+
+COPY build_nginx.sh /bin/build_nginx.sh
+
+CMD /bin/build_nginx.sh

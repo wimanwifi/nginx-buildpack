@@ -1,0 +1,8 @@
+version: '2'
+services:
+  builder-14:
+    build:
+      context: .
+      dockerfile: Dockerfile-14
+    volumes:
+      - ./build-14:/build

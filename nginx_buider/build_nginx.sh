@@ -25,10 +25,6 @@ temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
 num_cpu_cores=$(grep -c ^processor /proc/cpuinfo)
 
-echo "Serving files from /tmp on $PORT"
-cd /tmp
-python -m SimpleHTTPServer $PORT &
-
 cd $temp_dir
 echo "Temp dir: $temp_dir"
 
@@ -49,14 +45,9 @@ echo "Downloading $open_ssl_url"
 	./configure \
 		--with-pcre=pcre-${PCRE_VERSION} \
 		--prefix=/tmp/nginx \
+		--sbin-path=/build \
 		--add-module=${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
 		--with-http_ssl_module --with-openssl=${temp_dir}/nginx-${NGINX_VERSION}/openssl-${OPEN_SSL_VERSION} \
 		--with-http_sub_module
 	make -j ${num_cpu_cores} install
 )
-
-while true
-do
-	sleep 1
-	echo "."
-done
