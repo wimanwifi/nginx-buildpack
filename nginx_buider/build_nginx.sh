@@ -11,9 +11,9 @@
 
 set -o errexit
 
-NGINX_VERSION=${NGINX_VERSION-1.9.15}
-PCRE_VERSION=${PCRE_VERSION-8.38}
-OPEN_SSL_VERSION=${OPEN_SSL_VERSION-1.0.1p}
+NGINX_VERSION=${NGINX_VERSION-1.12.0}
+PCRE_VERSION=${PCRE_VERSION-8.40}
+OPEN_SSL_VERSION=${OPEN_SSL_VERSION-1.0.2l}
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=http://downloads.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
