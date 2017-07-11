@@ -6,3 +6,9 @@ services:
       dockerfile: Dockerfile-14
     volumes:
       - ./build-14:/build
+  builder-16:
+    build:
+      context: .
+      dockerfile: Dockerfile-16
+    volumes:
+      - ./build-16:/build
